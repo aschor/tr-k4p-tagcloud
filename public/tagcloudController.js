@@ -1,14 +1,30 @@
 // Create an Angular module for this plugin
 import { uiModules } from 'ui/modules';
+import { FilterManagerProvider } from 'ui/filter_manager';
 var module = uiModules.get('tr-k4p-tagcloud');
 
-// Minimum and maximum font size tags should have.
-var maxFontSize = 32,
-	minFontSize = 12;
-
     
-module.controller('TagcloudController', function($scope) {
+module.controller('TagcloudController', function($scope,Private) {
+    // Minimum and maximum font size tags should have.
+    var maxFontSize = 32,
+        minFontSize = 12;
+    
+    var filterManager = Private(FilterManagerProvider);
 
+	$scope.filter = function(tag) {
+		// Add a new filter via the filter manager
+		filterManager.add(
+			// The field to filter for, we can get it from the config
+			$scope.vis.aggs.bySchemaName['tags'][0].params.field,
+			// The value to filter for, we will read out the bucket key from the tag
+			tag.label,
+			// Whether the filter is negated. If you want to create a negated filter pass '-' here
+			null,
+			// The index pattern for the filter
+			$scope.vis.indexPattern.title
+		);
+	};
+    
 	$scope.$watch('esResponse', function(resp) {
 		if (!resp) {
 			$scope.tags = null;
